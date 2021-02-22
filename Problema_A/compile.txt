@@ -1,0 +1,2 @@
+g++ -std=c++17 -Wall -Wextra "problema_a.cpp" -lm
+a.exe < input_a.txt
