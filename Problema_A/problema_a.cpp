@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <list>
+#include <tuple>
 #include <string>
 #include <sstream>
 using namespace std;
@@ -7,6 +9,7 @@ using namespace std;
 class Board {
   public:
     vector<vector<int>> board;
+    list<tuple<int, int>> list_occ;
     int max_moves;
     int size;
 
@@ -14,6 +17,7 @@ class Board {
         string buffer;
         vector<int> line;
         int aux;
+        list<tuple<int, int>> ::iterator it;
 
         //cout << size << " " << max_moves << endl;
 
@@ -26,10 +30,47 @@ class Board {
             for(int j=0; j<size;j++){
                 block >> aux;
                 line.push_back(aux);
+
+                if(list_occ.empty()){
+                    list_occ.push_back(make_tuple(aux, 1));
+                    it =  list_occ.begin();
+                } 
+                else {
+                    //cout << get<0>(*it) << endl;
+                    if(get<0>(*it) > aux){
+                        list_occ.insert(it, make_tuple(aux, 1));
+                    }
+                    else if( get<0>(*it) < aux){
+
+                    }
+                    else{
+                        //*it<1>++;
+                    }
+                }
+                /*
+                if (command.compare("MOVE")==0){
+                    if (direction.compare("LEFT")==0)
+                        it--;
+                    else if (direction.compare("RIGHT")==0)
+                        it++;
+
+                } else if(command.compare("INSERT")==0) {
+                    cin >> input;
+                    if (direction.compare("LEFT")==0){
+                        l.insert(it, input);
+                    }
+                    else if (direction.compare("RIGHT")==0){
+                        aux = it;
+                        ++aux;
+                        l.insert(aux, input);
+                    }
+                }*/
+
             }
             board.push_back(line);
         }
     }
+
 
     // MUDAR
     // list<int>::iterator it= l.begin();
@@ -75,15 +116,8 @@ class Board {
               else if( value_next != 0){
                 board[i][j] = 0;
                 board[i][++col] = value_next;
-                j = col;
-                break;
+                value = value_next;
               }
-              /*
-              else if(j == size - 1){
-                board[i][j] = 0;
-                board[i][col] = value_next;
-                break;
-              }*/
 
               j++;
             }
@@ -127,8 +161,7 @@ class Board {
                         else if( value_next != 0){
                             board[i][j] = 0;
                             board[i][--col] = value_next;
-                            j = col;
-                            break;
+                            value = value_next;
                         }
 
                         j--;
@@ -150,31 +183,30 @@ class Board {
             line = 0, i = 0; //j é o seguinte
 
             do{
-            value = board[i][j];
-            i++;
-
-            if(value != 0){
-
-                board[i-1][j]=0;
-                board[line][j] = value;
-
-                while(i < size){
-
-                value_next = board[i][j];
-
-                if(value_next == value){
-                    board[i][j] = 0;
-                    board[line][j] = value*2;
-                    line++;
-                    break;
-                }
-                else if( value_next != 0){
-                    board[i][j] = 0;
-                    board[++line][j] = value_next;
-                    j = line;
-                    break;
-                }
+                value = board[i][j];
                 i++;
+
+                if(value != 0){
+
+                    board[i-1][j]=0;
+                    board[line][j] = value;
+
+                    while(i < size){
+
+                    value_next = board[i][j];
+
+                    if(value_next == value){
+                        board[i][j] = 0;
+                        board[line][j] = value*2;
+                        line++;
+                        break;
+                    }
+                    else if( value_next != 0){
+                        board[i][j] = 0;
+                        board[++line][j] = value_next;
+                        value = value_next;
+                    }
+                    i++;
                 }
             }
             }while(i<size); //enquanto não chega ao final da linha/coluna
@@ -216,8 +248,7 @@ class Board {
                 else if( value_next != 0){
                     board[i][j] = 0;
                     board[--line][j] = value_next;
-                    i = line;
-                    break;
+                    value = value_next;
                 }
                 i--;
                 }
@@ -226,6 +257,32 @@ class Board {
         }
     }
 };
+
+
+int countMoves(Board board, int counter){
+    Board aux;
+    if (counter>=board.max_moves) {
+        return -1; // MUDAR
+    } else {
+        aux = board;
+        aux.shiftTop();
+        countMoves(aux, counter + 1);
+
+        aux = board;
+        aux.shiftLeft();
+        countMoves(aux, counter + 1);
+
+        aux = board;
+        aux.shiftRight();
+        countMoves(aux, counter + 1);
+
+        aux = board;
+        aux.shiftBottom();
+        countMoves(aux, counter + 1);
+    }
+    return 0;
+}
+
 
 int main() {
     int num_tables;
@@ -245,9 +302,9 @@ int main() {
         ss >> board.size >> board.max_moves;
 
         board.buildBoard();
-        board.printBoard();
+        //board.printBoard();
+        //countMoves(board,0);
     }
-
 
     return 0;
 }
