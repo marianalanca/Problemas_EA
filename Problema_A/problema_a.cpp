@@ -4,12 +4,13 @@
 #include <tuple>
 #include <string>
 #include <sstream>
+#include <bits/stdc++.h>
 using namespace std;
 
 class Board {
   public:
     vector<vector<int>> board;
-    list<tuple<int, int>> list_occ;
+    vector<tuple<int, int>> vector_occ;
     int max_moves;
     int size;
 
@@ -17,7 +18,7 @@ class Board {
         string buffer;
         vector<int> line;
         int aux;
-        list<tuple<int, int>> ::iterator it;
+        //list<tuple<int, int>> ::iterator it;
 
         //cout << size << " " << max_moves << endl;
 
@@ -30,51 +31,42 @@ class Board {
             for(int j=0; j<size;j++){
                 block >> aux;
                 line.push_back(aux);
-
-                if(list_occ.empty()){
-                    list_occ.push_back(make_tuple(aux, 1));
-                    it =  list_occ.begin();
-                } 
-                else {
-                    //cout << get<0>(*it) << endl;
-                    if(get<0>(*it) > aux){
-                        list_occ.insert(it, make_tuple(aux, 1));
-                    }
-                    else if( get<0>(*it) < aux){
-
-                    }
-                    else{
-                        //*it<1>++;
-                    }
+                
+                if(aux != 0){
+                    buildVector(aux);
                 }
-                /*
-                if (command.compare("MOVE")==0){
-                    if (direction.compare("LEFT")==0)
-                        it--;
-                    else if (direction.compare("RIGHT")==0)
-                        it++;
-
-                } else if(command.compare("INSERT")==0) {
-                    cin >> input;
-                    if (direction.compare("LEFT")==0){
-                        l.insert(it, input);
-                    }
-                    else if (direction.compare("RIGHT")==0){
-                        aux = it;
-                        ++aux;
-                        l.insert(aux, input);
-                    }
-                }*/
-
+                
             }
             board.push_back(line);
+        }
+    }
+  
+    void buildVector(int num){
+        vector<tuple<int, int>>::iterator it;
+
+        if(vector_occ.empty()){
+            vector_occ.emplace_back(num, 1);
+        }
+        else{
+
+            for(it = vector_occ.begin(); it < vector_occ.end(); it++){
+
+                if(get<0>(*it) == num){
+                    get<1>(*it) ++;
+                    break;
+                }
+                else if(get<0>(*it) > num){
+                    vector_occ.insert(it, make_tuple(num, 1));
+                    break;
+                }
+            }
         }
     }
 
 
     // MUDAR
-    // list<int>::iterator it= l.begin();
     void printBoard(){
+        // list<int>::iterator it= l.begin();
         for (int i = 0; i < (int) size; i++) {
             for (int j = 0; j < (int) size; j++)
                 cout << board[i][j] << " ";
@@ -256,6 +248,38 @@ class Board {
             }while(i>=0); //enquanto não chega ao final da linha/coluna
         }
     }
+  
+    bool possible( vector<tuple<int, int>> vector_aux){
+
+        vector<tuple<int, int>>::iterator it;
+        tuple<int, int> tuple_aux;
+
+        if(vector_aux.empty()){
+            return  false;
+        }
+
+        if(get<1>(*vector_aux.begin()) % 2 != 0){
+            return false;
+        }
+
+        tuple_aux = make_tuple(get<0>(*vector_aux.begin())* 2,get<1>(*vector_aux.begin())/2);
+        vector_aux.erase(vector_aux.begin());
+
+        for(it = vector_aux.begin(); it < vector_aux.end(); it++){
+            if(get<0>(*it) == get<0>(tuple_aux)){
+                get<1>(*it) += get<1>(tuple_aux);
+                return possible(vector_aux);
+            }
+            else if(get<0>(*it) > get<0>(tuple_aux)){
+                vector_aux.insert(it, tuple_aux);
+                return possible(vector_aux);
+            }
+        }
+
+
+        return true;
+    }
+  
 };
 
 
@@ -302,6 +326,9 @@ int main() {
         ss >> board.size >> board.max_moves;
 
         board.buildBoard();
+      
+        cout << "Is possible? " << board.possible(board.vector_occ) << "\n";
+      
         //board.printBoard();
         //countMoves(board,0);
     }
