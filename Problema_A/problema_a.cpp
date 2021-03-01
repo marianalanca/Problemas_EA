@@ -154,6 +154,7 @@ class Board {
                 board[i][j] = 0;
                 board[i][++col] = value_next;
                 value = value_next;
+                isUpdated = true;
               }
 
               j++;
@@ -202,6 +203,7 @@ class Board {
                             board[i][j] = 0;
                             board[i][--col] = value_next;
                             value = value_next;
+                            isUpdated = true;
                         }
 
                         j--;
@@ -249,6 +251,7 @@ class Board {
                         board[i][j] = 0;
                         board[++line][j] = value_next;
                         value = value_next;
+                        isUpdated = true;
                     }
                     i++;
                 }
@@ -297,6 +300,7 @@ class Board {
                     board[i][j] = 0;
                     board[--line][j] = value_next;
                     value = value_next;
+                    isUpdated = true;
                 }
                 i--;
                 }
@@ -348,7 +352,7 @@ class Board {
         if (vector_occ.size()==1 && get<1>(*vector_occ.begin()) == 1){
             return true;
         }
-        return false; //Aqui nao devia ser falso? -> sim mas eu pus true só para testar uma coisa
+        return false;
     }
 };
 
@@ -357,42 +361,36 @@ class Board {
 
 void countMoves(Board board, int counter, int& best){ // mudar counter
     Board aux;
-
-    // posso não precisar desta parte e pôr no else do counter < best
-    if (counter>board.max_moves) {
-        best = -1;
-    } else {
-        if (board.isCompleted()){
-            cout << "count: " << counter << '\t' << "best: " << best << '\n';
-            if (counter < best) {
-                best = counter;
-            }
-            return;
+    if (board.isCompleted()){
+        //cout << "count: " << counter << '\t' << "best: " << best << '\n';
+        if (counter < best) {
+            best = counter;
         }
-        if (counter <= best) { // se for maior do que o best já não é necessário continuar
-            aux = board;
-            if (aux.shiftLeft()) {
-                cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
-                countMoves(aux, counter +1, best);
-            }
+        return;
+    }
+    if (counter <= best) { // se for maior do que o best já não é necessário continuar
+        counter++;
+        aux = board;
+        if (aux.shiftRight()) {
+            //cout << "shiftRight()" << '\t'<< "count: " << counter<< '\t'<< "best:" <<best << '\n';
+            countMoves(aux, counter, best);
+        }
+        aux = board;
+        if (aux.shiftLeft()) { //Tipo aqui tu só entras se houver um merge, certo?
+            //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
+            countMoves(aux, counter, best);
+        }
 
-            aux = board;
-            if (aux.shiftTop()) {
-                cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-                countMoves(aux, counter +1, best);
-            }
+        aux = board;
+        if (aux.shiftTop()) {
+            //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+            countMoves(aux, counter, best);
+        }
 
-            aux = board;
-            if (aux.shiftRight()) {
-                cout << "shiftRight()" << '\t'<< "count: " << counter<< '\t'<< "best:" <<best << '\n';
-                countMoves(aux, counter +1, best);
-            }
-
-            aux = board;
-            if (aux.shiftBottom()) {
-                cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-                countMoves(aux, counter +1, best);
-            }
+        aux = board;
+        if (aux.shiftBottom()) {
+            //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+            countMoves(aux, counter, best);
         }
     }
     return;
@@ -403,7 +401,7 @@ void printMoves(Board board) {
     countMoves(board, 0, best);
     //cout << best << '\n';
 
-    if (best == -1) {
+    if (best > board.max_moves) {
         cout << "no solution" << '\n';
     } else {
         cout << best << '\n';
