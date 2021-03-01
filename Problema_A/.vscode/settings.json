@@ -6,6 +6,11 @@
         "xstring": "cpp",
         "iosfwd": "cpp",
         "list": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "istream": "cpp",
+        "memory": "cpp",
+        "utility": "cpp",
+        "xlocnum": "cpp",
+        "xutility": "cpp"
     }
 }
