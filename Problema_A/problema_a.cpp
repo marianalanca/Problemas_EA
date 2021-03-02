@@ -3,7 +3,6 @@
 #include <list>
 #include <tuple>
 #include <string>
-#include <sstream>
 using namespace std;
 
 
@@ -19,24 +18,19 @@ class Board {
         vector<int> line;
         int aux;
 
-        //cout << size << " " << max_moves << endl;
-
         for (int i=0; i<size; i++){
-            getline(cin, buffer);
-
             line.clear();
-            istringstream block(buffer);
 
             for(int j=0; j<size;j++){
-                block >> aux;
-                line.push_back(aux);
+                cin >> aux;
+                line.insert(line.end(), aux);
 
                 if(aux != 0){
                     buildVector(aux);
                 }
 
             }
-            board.push_back(line);
+            board.insert(board.end(), line);
         }
     }
 
@@ -135,8 +129,10 @@ class Board {
 
           if(value != 0){
 
-            board[i][j-1]=0;
-            board[i][col] = value;
+            if(j-1 != col){
+                board[i][j-1]=0;
+                board[i][col] = value;
+            }
 
             while(j < size){
 
@@ -184,8 +180,10 @@ class Board {
 
                 if(value != 0){
 
-                    board[i][j+1]=0;
-                    board[i][col] = value;
+                    if(j+1 != col){
+                        board[i][j+1]=0;
+                        board[i][col] = value;
+                    }
 
                     while(j >= 0){
 
@@ -232,8 +230,10 @@ class Board {
 
                 if(value != 0){
 
-                    board[i-1][j]=0;
-                    board[line][j] = value;
+                    if(i-1 != line){
+                        board[i-1][j]=0;
+                        board[line][j] = value;
+                    }
 
                     while(i < size){
 
@@ -281,8 +281,10 @@ class Board {
 
             if(value != 0){
 
-                board[i+1][j]=0;
-                board[line][j] = value;
+                if(i+1 != line){
+                    board[i+1][j]=0;
+                    board[line][j] = value;
+                }
 
                 while(i >= 0){
 
@@ -345,22 +347,18 @@ class Board {
     }
 
     bool isCompleted () {
-        // DEBUG
-        //cout << "VECTOR: " << vector_occ.size() << " " << get<1>(*vector_occ.begin()) << '\n';
-        //printVector();
-
-        if (vector_occ.size()==1 && get<1>(*vector_occ.begin()) == 1){
-            return true;
-        }
-        return false;
+        return vector_occ.size() == 1 && get<1>(*vector_occ.begin()) == 1;
     }
 };
 
 
 // PUTA XDDDD
-
+// IMPROVE
 void countMoves(Board board, int counter, int& best){ // mudar counter
     Board aux;
+    if (counter > board.max_moves) {
+        return;
+    }
     if (board.isCompleted()){
         //cout << "count: " << counter << '\t' << "best: " << best << '\n';
         if (counter < best) {
@@ -368,6 +366,7 @@ void countMoves(Board board, int counter, int& best){ // mudar counter
         }
         return;
     }
+
     if (counter <= best) { // se for maior do que o best já não é necessário continuar
         counter++;
         aux = board;
@@ -397,14 +396,18 @@ void countMoves(Board board, int counter, int& best){ // mudar counter
 }
 
 void printMoves(Board board) {
-    int best = board.max_moves +1;
-    countMoves(board, 0, best);
-    //cout << best << '\n';
+    if (board.isPossible(board.vector_occ)) {
 
-    if (best > board.max_moves) {
-        cout << "no solution" << '\n';
+        int best = board.max_moves +1;
+        countMoves(board, 0, best);
+
+        if (best > board.max_moves) {
+            cout << "no solution" << '\n';
+        } else {
+            cout << best << '\n';
+        }
     } else {
-        cout << best << '\n';
+        cout << "no solution" << '\n';
     }
 }
 
@@ -412,23 +415,16 @@ int main() {
     int num_tables;
     string buffer;
 
-    //get tables number
-    getline(cin, buffer);
-    istringstream num(buffer);
-    num >> num_tables;
+    cin >> num_tables;
 
-    while(getline(cin, buffer)){
+    for (int i =0; i<num_tables;i++){
 
         Board board;
 
         // get matrix size and max number of moves
-        istringstream ss(buffer);
-        ss >> board.size >> board.max_moves;
+        cin >> board.size >> board.max_moves;
 
         board.buildBoard();
-
-        //cout << "Is Possible? " << board.isPossible(board.vector_occ) << "\n";
-        //board.printBoard();
 
         printMoves(board);
     }

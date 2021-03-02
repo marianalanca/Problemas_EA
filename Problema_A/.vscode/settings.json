@@ -11,6 +11,10 @@
         "memory": "cpp",
         "utility": "cpp",
         "xlocnum": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "sstream": "cpp",
+        "ostream": "cpp",
+        "initializer_list": "cpp",
+        "type_traits": "cpp"
     }
 }
