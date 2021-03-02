@@ -113,7 +113,7 @@ class Board {
 
     // MOVES
     //LEFT
-    bool shiftLeft(){
+    bool shiftLeft(int& move){
       int i, j;
       int col;
       int value, value_next;
@@ -150,7 +150,6 @@ class Board {
                 board[i][j] = 0;
                 board[i][++col] = value_next;
                 value = value_next;
-                isUpdated = true;
               }
 
               j++;
@@ -160,11 +159,13 @@ class Board {
 
         }while(j<size);
       }
+      if (!isUpdated) move = 2;
+      else move = -1;
       return isUpdated;
     }
 
     //RIGHT
-    bool shiftRight(){
+    bool shiftRight(int &move){
         int i, j;
         int col;
         int value, value_next;
@@ -209,11 +210,13 @@ class Board {
                 }
             }while(j>=0);
         }
+        if (!isUpdated) move = 1;
+        else move = -1;
         return isUpdated;
     }
 
     //TOP
-    bool shiftTop(){
+    bool shiftTop(int& move){
         int i, j;
         int line;
         int value, value_next;
@@ -258,11 +261,13 @@ class Board {
             }
             }while(i<size); //enquanto não chega ao final da linha/coluna
         }
+        if (!isUpdated) move = 3;
+        else move = -1;
         return isUpdated;
     }
 
     //BOTTOM
-    bool shiftBottom(){
+    bool shiftBottom(int& move){
         int i, j;
         int line;
         int value, value_next;
@@ -309,6 +314,8 @@ class Board {
             }
             }while(i>=0); //enquanto não chega ao final da linha/coluna
         }
+        if (!isUpdated) move = 4; // there was no shift so there is no need to try it again later
+        else move = -1;
         return isUpdated;
     }
 
@@ -354,7 +361,7 @@ class Board {
 
 // PUTA XDDDD
 // IMPROVE
-void countMoves(Board board, int counter, int& best){ // mudar counter
+void countMoves(Board board, int counter, int& best, int previous_move){ // mudarss counter
     Board aux;
     if (counter > board.max_moves) {
         return;
@@ -370,26 +377,26 @@ void countMoves(Board board, int counter, int& best){ // mudar counter
     if (counter <= best) { // se for maior do que o best já não é necessário continuar
         counter++;
         aux = board;
-        if (aux.shiftRight()) {
+        if (previous_move != 1 && aux.shiftRight(previous_move)) { // if the shift was tried previously with no result, there is no need to try again
             //cout << "shiftRight()" << '\t'<< "count: " << counter<< '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best);
+            countMoves(aux, counter, best, previous_move);
         }
         aux = board;
-        if (aux.shiftLeft()) { //Tipo aqui tu só entras se houver um merge, certo?
+        if (previous_move != 2 && aux.shiftLeft(previous_move)) { //Tipo aqui tu só entras se houver um merge, certo?
             //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
-            countMoves(aux, counter, best);
+            countMoves(aux, counter, best, previous_move);
         }
 
         aux = board;
-        if (aux.shiftTop()) {
+        if (previous_move != 1 && aux.shiftTop(previous_move)) {
             //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best);
+            countMoves(aux, counter, best, previous_move);
         }
 
         aux = board;
-        if (aux.shiftBottom()) {
+        if (previous_move != 1 && aux.shiftBottom(previous_move)) {
             //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best);
+            countMoves(aux, counter, best, previous_move);
         }
     }
     return;
@@ -399,7 +406,7 @@ void printMoves(Board board) {
     if (board.isPossible(board.vector_occ)) {
 
         int best = board.max_moves +1;
-        countMoves(board, 0, best);
+        countMoves(board, 0, best, -1);
 
         if (best > board.max_moves) {
             cout << "no solution" << '\n';
