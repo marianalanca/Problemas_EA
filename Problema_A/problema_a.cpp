@@ -132,6 +132,7 @@ class Board {
             if(j-1 != col){
                 board[i][j-1]=0;
                 board[i][col] = value;
+                isUpdated = true;
             }
 
             while(j < size){
@@ -165,54 +166,58 @@ class Board {
     }
 
     //RIGHT
-    bool shiftRight(int &move){
-        int i, j;
-        int col;
-        int value, value_next;
-        bool isUpdated = false;
+    bool shiftRight(int& move){
+      int i, j;
+      int col;
+      int value, value_next;
+      bool isUpdated = false;
 
-        for(i = 0; i < size; i++){
+      for(i = 0; i< size; i++){
 
-            col = size - 1, j = size - 1;
+        col = size-1, j = size-1;
 
-            do{
-                value = board[i][j];
-                j--;
+        do{
+          value = board[i][j];
+          j--;
 
-                if(value != 0){
+          if(value != 0){
 
-                    if(j+1 != col){
-                        board[i][j+1]=0;
-                        board[i][col] = value;
-                    }
+            if(j+1 != col){
+                board[i][j+1]=0;
+                board[i][col] = value;
+                isUpdated = true;
+            }
 
-                    while(j >= 0){
+            while(j >= 0){
 
-                        value_next = board[i][j];
+              value_next = board[i][j];
 
-                        if(value_next == value){
-                            board[i][j] = 0;
-                            board[i][col] = value<<1;
-                            isUpdated = true;
-                            updateVector(value);
-                            col--;
-                            break;
-                        }
-                        else if( value_next != 0){
-                            board[i][j] = 0;
-                            board[i][--col] = value_next;
-                            value = value_next;
-                            isUpdated = true;
-                        }
+              if(value_next == value){
+                board[i][j] = 0;
+                board[i][col] = value<<1;
+                isUpdated = true;
+                updateVector(value);
+                col--;
+                break;
+              }
+              else if( value_next != 0){
+                board[i][j] = 0;
+                board[i][--col] = value_next;
+                value = value_next;
+                //isUpdated = true;
+              }
 
-                        j--;
-                    }
-                }
-            }while(j>=0);
-        }
-        if (!isUpdated) move = 1;
-        else move = -1;
-        return isUpdated;
+              j--;
+            }
+
+           }
+
+        }while(j>=0);
+      }
+      //cout << "isupdated: " << isUpdated << '\n';
+      if (!isUpdated) move = 1;
+      else move = -1;
+      return isUpdated;
     }
 
     //TOP
@@ -236,6 +241,7 @@ class Board {
                     if(i-1 != line){
                         board[i-1][j]=0;
                         board[line][j] = value;
+                        isUpdated = true;
                     }
 
                     while(i < size){
@@ -254,7 +260,6 @@ class Board {
                         board[i][j] = 0;
                         board[++line][j] = value_next;
                         value = value_next;
-                        isUpdated = true;
                     }
                     i++;
                 }
@@ -289,6 +294,7 @@ class Board {
                 if(i+1 != line){
                     board[i+1][j]=0;
                     board[line][j] = value;
+                    isUpdated = true;
                 }
 
                 while(i >= 0){
@@ -307,7 +313,6 @@ class Board {
                     board[i][j] = 0;
                     board[--line][j] = value_next;
                     value = value_next;
-                    isUpdated = true;
                 }
                 i--;
                 }
@@ -363,9 +368,6 @@ class Board {
 // IMPROVE
 void countMoves(Board board, int counter, int& best, int previous_move){ // mudarss counter
     Board aux;
-    if (counter > board.max_moves) {
-        return;
-    }
     if (board.isCompleted()){
         //cout << "count: " << counter << '\t' << "best: " << best << '\n';
         if (counter < best) {
@@ -374,29 +376,38 @@ void countMoves(Board board, int counter, int& best, int previous_move){ // muda
         return;
     }
 
-    if (counter <= best) { // se for maior do que o best já não é necessário continuar
+    if (counter <= best && counter < board.max_moves) { // se for maior do que o best já não é necessário continuar
         counter++;
-        aux = board;
-        if (previous_move != 1 && aux.shiftRight(previous_move)) { // if the shift was tried previously with no result, there is no need to try again
-            //cout << "shiftRight()" << '\t'<< "count: " << counter<< '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best, previous_move);
+        //board.printBoard();
+        //cout << "prev_move: " << previous_move << '\n';
+        if (previous_move != 1) { //Tipo aqui tu só entras se houver um merge, certo?
+            aux = board;
+            if (aux.shiftRight(previous_move)) {
+                //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
+                countMoves(aux, counter, best, previous_move);
+            }
         }
-        aux = board;
-        if (previous_move != 2 && aux.shiftLeft(previous_move)) { //Tipo aqui tu só entras se houver um merge, certo?
-            //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
-            countMoves(aux, counter, best, previous_move);
+        if (previous_move != 3) {
+            aux = board;
+            if (aux.shiftTop(previous_move)) {
+                //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+                countMoves(aux, counter, best, previous_move);
+            }
+        }
+        if (previous_move != 2) { //Tipo aqui tu só entras se houver um merge, certo?
+            aux = board;
+            if (aux.shiftLeft(previous_move)) {
+                //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
+                countMoves(aux, counter, best, previous_move);
+            }
         }
 
-        aux = board;
-        if (previous_move != 1 && aux.shiftTop(previous_move)) {
-            //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best, previous_move);
-        }
-
-        aux = board;
-        if (previous_move != 1 && aux.shiftBottom(previous_move)) {
-            //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-            countMoves(aux, counter, best, previous_move);
+        if (previous_move != 4) {
+            aux = board;
+            if (aux.shiftBottom(previous_move)){
+                //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+                countMoves(aux, counter, best, previous_move);
+            }
         }
     }
     return;
