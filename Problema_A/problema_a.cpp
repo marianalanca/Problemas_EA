@@ -366,7 +366,7 @@ class Board {
 
 // PUTA XDDDD
 // IMPROVE
-void countMoves(Board board, int counter, int& best, int previous_move){ // mudarss counter
+void countMoves(Board &board, int counter, int& best, int previous_move){
     Board aux;
     if (board.isCompleted()){
         //cout << "count: " << counter << '\t' << "best: " << best << '\n';
