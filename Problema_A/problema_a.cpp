@@ -376,7 +376,8 @@ void countMoves(Board board, int counter, int& best, int previous_move){ // muda
         return;
     }
 
-    if (counter <= best && counter < board.max_moves) { // se for maior do que o best já não é necessário continuar
+    //cout << "best - counter= " << best - counter << " get<1>(*board.vector_occ.begin()) = " << get<1>(*board.vector_occ.begin()) << '\n';
+    if (counter <= best && counter < board.max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2) )) { // se for maior do que o best já não é necessário continuar
         counter++;
         //board.printBoard();
         //cout << "prev_move: " << previous_move << '\n';
