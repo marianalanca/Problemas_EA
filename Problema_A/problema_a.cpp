@@ -1,27 +1,25 @@
 #include <iostream>
 #include <vector>
-#include <list>
 #include <tuple>
 #include <string>
 using namespace std;
 
+int board_size, max_moves;
 
 class Board {
   public:
     vector<vector<int>> board;
     vector<tuple<int, int>> vector_occ;
-    int max_moves;
-    int size;
 
     void buildBoard(){
         string buffer;
         vector<int> line;
         int aux;
 
-        for (int i=0; i<size; i++){
+        for (int i=0; i<board_size; i++){
             line.clear();
 
-            for(int j=0; j<size;j++){
+            for(int j=0; j<board_size;j++){
                 cin >> aux;
                 line.insert(line.end(), aux);
 
@@ -119,7 +117,7 @@ class Board {
       int value, value_next;
       bool isUpdated = false;
 
-      for(i = 0; i< size; i++){
+      for(i = 0; i< board_size; i++){
 
         col = 0, j = 0;
 
@@ -135,7 +133,7 @@ class Board {
                 isUpdated = true;
             }
 
-            while(j < size){
+            while(j < board_size){
 
               value_next = board[i][j];
 
@@ -158,9 +156,9 @@ class Board {
 
            }
 
-        }while(j<size);
+        }while(j<board_size);
       }
-      if (!isUpdated) move = 2;
+      if (!isUpdated) move = 1;
       else move = -1;
       return isUpdated;
     }
@@ -172,9 +170,9 @@ class Board {
       int value, value_next;
       bool isUpdated = false;
 
-      for(i = 0; i< size; i++){
+      for(i = 0; i< board_size; i++){
 
-        col = size-1, j = size-1;
+        col = board_size-1, j = board_size-1;
 
         do{
           value = board[i][j];
@@ -228,7 +226,7 @@ class Board {
         bool isUpdated = false;
 
         // percorrer todas as colunas
-        for(j = 0; j< size; j++){ //i conta a coluna
+        for(j = 0; j< board_size; j++){ //i conta a coluna
 
             line = 0, i = 0; //j é o seguinte
 
@@ -244,7 +242,7 @@ class Board {
                         isUpdated = true;
                     }
 
-                    while(i < size){
+                    while(i < board_size){
 
                     value_next = board[i][j];
 
@@ -264,9 +262,9 @@ class Board {
                     i++;
                 }
             }
-            }while(i<size); //enquanto não chega ao final da linha/coluna
+            }while(i<board_size); //enquanto não chega ao final da linha/coluna
         }
-        if (!isUpdated) move = 3;
+        if (!isUpdated) move = 2;
         else move = -1;
         return isUpdated;
     }
@@ -279,9 +277,9 @@ class Board {
         bool isUpdated = false;
 
         // percorrer todas as colunas
-        for(j = 0; j < size; j++){ //i conta a coluna
+        for(j = 0; j < board_size; j++){ //i conta a coluna
 
-            line = size-1, i = size-1; //j é o seguinte
+            line = board_size-1, i = board_size-1; //j é o seguinte
 
             do{
             value = board[i][j];
@@ -319,7 +317,7 @@ class Board {
             }
             }while(i>=0); //enquanto não chega ao final da linha/coluna
         }
-        if (!isUpdated) move = 4; // there was no shift so there is no need to try it again later
+        if (!isUpdated) move = 2; // there was no shift so there is no need to try it again later
         else move = -1;
         return isUpdated;
     }
@@ -363,11 +361,10 @@ class Board {
     }
 };
 
-
-// PUTA XDDDD
-// IMPROVE
 void countMoves(Board &board, int counter, int& best, int previous_move){
     Board aux;
+
+    // ãcceptance consition
     if (board.isCompleted()){
         //cout << "count: " << counter << '\t' << "best: " << best << '\n';
         if (counter < best) {
@@ -376,26 +373,30 @@ void countMoves(Board &board, int counter, int& best, int previous_move){
         return;
     }
 
-    //cout << "best - counter= " << best - counter << " get<1>(*board.vector_occ.begin()) = " << get<1>(*board.vector_occ.begin()) << '\n';
-    if (counter <= best && counter < board.max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2) )) { // se for maior do que o best já não é necessário continuar
+    // rejection condition
+    /*if (counter < best && counter < board.max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2))) {
+        return;
+    }*/
+
+    if (counter < best && counter < max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2))) { // se for maior do que o best já não é necessário continuar
         counter++;
         //board.printBoard();
         //cout << "prev_move: " << previous_move << '\n';
-        if (previous_move != 1) { //Tipo aqui tu só entras se houver um merge, certo?
+        if (previous_move != 1) {
             aux = board;
             if (aux.shiftRight(previous_move)) {
                 //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
                 countMoves(aux, counter, best, previous_move);
             }
         }
-        if (previous_move != 3) {
+        if (previous_move != 2) {
             aux = board;
             if (aux.shiftTop(previous_move)) {
                 //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
                 countMoves(aux, counter, best, previous_move);
             }
         }
-        if (previous_move != 2) { //Tipo aqui tu só entras se houver um merge, certo?
+        if (previous_move != 1) { //Tipo aqui tu só entras se houver um merge, certo?
             aux = board;
             if (aux.shiftLeft(previous_move)) {
                 //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
@@ -403,7 +404,7 @@ void countMoves(Board &board, int counter, int& best, int previous_move){
             }
         }
 
-        if (previous_move != 4) {
+        if (previous_move != 2) {
             aux = board;
             if (aux.shiftBottom(previous_move)){
                 //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
@@ -417,10 +418,10 @@ void countMoves(Board &board, int counter, int& best, int previous_move){
 void printMoves(Board board) {
     if (board.isPossible(board.vector_occ)) {
 
-        int best = board.max_moves +1;
+        int best = max_moves +1;
         countMoves(board, 0, best, -1);
 
-        if (best > board.max_moves) {
+        if (best > max_moves) {
             cout << "no solution" << '\n';
         } else {
             cout << best << '\n';
@@ -441,7 +442,7 @@ int main() {
         Board board;
 
         // get matrix size and max number of moves
-        cin >> board.size >> board.max_moves;
+        cin >> board_size >> max_moves;
 
         board.buildBoard();
 
