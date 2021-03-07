@@ -2,6 +2,7 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <cmath>
 using namespace std;
 
 int board_size, max_moves;
@@ -78,8 +79,6 @@ class Board {
 
 
         if(it < vector_occ.end()){
-
-            //cout << "Teste " << num << ": " << get<0>(*it) << " -> " << get<1>(*it) <<"\n";
 
             if(get<0>(*it) == num2){
                 get<1>(*it) += 1;
@@ -325,35 +324,15 @@ class Board {
     bool isPossible( vector<tuple<int, int>> vector_aux){
 
         vector<tuple<int, int>>::iterator it;
-        tuple<int, int> tuple_aux;
-
-        if(vector_aux.empty()){
-            return  false;
-        }
-
-        if(vector_aux.size() == 1 && get<1>(*vector_aux.begin())  == 1 ){ // se existir apenas um elemento
-            return true;
-        }
-
-        if(get<1>(*vector_aux.begin()) % 2 != 0){ // se primeiro valor for impar, um deles vai ficar sem par
-            return false;
-        }
-
-        tuple_aux = make_tuple(get<0>(*vector_aux.begin())* 2, get<1>(*vector_aux.begin())/2);
-        vector_aux.erase(vector_aux.begin());
+        int soma = 0;
 
         for(it = vector_aux.begin(); it < vector_aux.end(); it++){
-            if(get<0>(*it) == get<0>(tuple_aux)){
-                get<1>(*it) += get<1>(tuple_aux);
-                return isPossible(vector_aux);
-            }
-            else if(get<0>(*it) > get<0>(tuple_aux)){
-                vector_aux.insert(it, tuple_aux);
-                return isPossible(vector_aux);
-            }
+
+            soma += get<0>(*it) * get<1>(*it);
+
         }
 
-        return true;
+        return floor(log2(soma)) == log2(soma);
     }
 
     bool isCompleted () {
@@ -364,7 +343,7 @@ class Board {
 void countMoves(Board &board, int counter, int& best, int previous_move){
     Board aux;
 
-    // ãcceptance consition
+    // acceptance condition
     if (board.isCompleted()){
         //cout << "count: " << counter << '\t' << "best: " << best << '\n';
         if (counter < best) {
@@ -374,42 +353,42 @@ void countMoves(Board &board, int counter, int& best, int previous_move){
     }
 
     // rejection condition
-    /*if (counter < best && counter < board.max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2))) {
+    if (!(counter < best && counter < max_moves &&
+         !(best - counter < 2 &&
+         (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2)))) {
         return;
-    }*/
+    }
 
-    if (counter < best && counter < max_moves && !(best - counter < 2 && (board.vector_occ.size() > 1  || get<1>(*board.vector_occ.begin()) > 2))) { // se for maior do que o best já não é necessário continuar
-        counter++;
-        //board.printBoard();
-        //cout << "prev_move: " << previous_move << '\n';
-        if (previous_move != 1) {
-            aux = board;
-            if (aux.shiftRight(previous_move)) {
-                //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
-                countMoves(aux, counter, best, previous_move);
-            }
+    counter++;
+    //board.printBoard();
+    //cout << "prev_move: " << previous_move << '\n';
+    if (previous_move != 1) {
+        aux = board;
+        if (aux.shiftRight(previous_move)) {
+            //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
+            countMoves(aux, counter, best, previous_move);
         }
-        if (previous_move != 2) {
-            aux = board;
-            if (aux.shiftTop(previous_move)) {
-                //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-                countMoves(aux, counter, best, previous_move);
-            }
+    }
+    if (previous_move != 2) {
+        aux = board;
+        if (aux.shiftTop(previous_move)) {
+            //cout << "shiftTop()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+            countMoves(aux, counter, best, previous_move);
         }
-        if (previous_move != 1) { //Tipo aqui tu só entras se houver um merge, certo?
-            aux = board;
-            if (aux.shiftLeft(previous_move)) {
-                //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
-                countMoves(aux, counter, best, previous_move);
-            }
+    }
+    if (previous_move != 1) { //Tipo aqui tu só entras se houver um merge, certo?
+        aux = board;
+        if (aux.shiftLeft(previous_move)) {
+            //cout << "shiftLeft()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best <<'\n';
+            countMoves(aux, counter, best, previous_move);
         }
+    }
 
-        if (previous_move != 2) {
-            aux = board;
-            if (aux.shiftBottom(previous_move)){
-                //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
-                countMoves(aux, counter, best, previous_move);
-            }
+    if (previous_move != 2) {
+        aux = board;
+        if (aux.shiftBottom(previous_move)){
+            //cout << "shiftBottom()" << '\t'<< "count: " << counter << '\t'<< "best:" <<best << '\n';
+            countMoves(aux, counter, best, previous_move);
         }
     }
     return;
@@ -445,6 +424,8 @@ int main() {
         cin >> board_size >> max_moves;
 
         board.buildBoard();
+
+        //cout << board.isPossible(board.vector_occ) << '\n';
 
         printMoves(board);
     }
