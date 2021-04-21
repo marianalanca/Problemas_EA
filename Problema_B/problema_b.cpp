@@ -90,7 +90,6 @@ void reserve_T() {
 
 vector<int> arc(){
   int h_sub_min = 0;
-  vector <int> test;
 
   for (int i=0;i<n-1;i++) {
     for (int j=h;j<H+1;j++) {
@@ -99,10 +98,29 @@ vector<int> arc(){
 
         for (int k=1; k < h && j+k<H+1; k++) {
           // subida
-          if (j+k>=h_sub_min)                                    // HERE
+          if (j+k>=h_sub_min)                                // TODO
             T[j+k][i+1] += k;
         }
       }
+
+      if (i>0) {
+        // fazer for do 0 & verificar se é maior!
+          if (j+h-1<H) {
+            int v = h;
+            int k=0;
+            while (j+v-1>j) {
+              if (T[j+v-1][i]>k)
+                k = T[j+v-1][i];
+              v--;
+            }
+            T[j][i+1] = k;
+            //cout << j << " " << i+1 << " "<< j+h-1<<" "<<T[j][i+1] << " " << T[j+h-1][i]<<"\n";
+          } else if (j < H){
+            //cout << j << " " << i+1 << " "<< H<<" "<<T[j][i+1] << " " << T[H][i]<<"\n";
+            T[j][i+1] += T[H][i];
+          }
+        }
+
     }
   }
   return T[h];
@@ -125,8 +143,6 @@ int main() {
         }
         T.clear();
         reserve_T();
-        //print_matrix(T);
-        //arc();
 
         // sum_line(T,h,n)
         cout <<mod_abs(sum_line(arc()), module) << '\n';
