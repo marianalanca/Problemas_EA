@@ -18,6 +18,7 @@ using namespace std;
 
 int module = 1000000007;
 int n, h, H;
+vector<vector<int>> T;
 
 // Statement formulas
 int mod_abs(int a, int mod) {
@@ -39,6 +40,7 @@ void print_matrix (vector<vector<int>> matrix) {
     cout << endl;
   }
 }
+
 void print_vector (vector<int> matrix) {
   for ( const auto &row : matrix )
   {
@@ -54,35 +56,56 @@ int sum_vector(vector<int> vec) {
     total += v;
   return total;
 }
-// direction -> 1 - up; 0 -> down
-vector <int> DP;
-int accepted;
-int arc(int ni, int hi, bool direction){
 
-  if (ni >= 3 && hi==h) { // se chegou ao final e está na posição certa -> conta
-   return 1;
+int sum_line(vector<vector<int>> matrix, int h, int size){
+  int sum = 0;
+  for (int i=2;i<size;i++){
+    sum+=matrix[h][i];
   }
-  if (ni == n && hi!=h) { // mudar!!! -> se chegou ao final e não está no chão! -> não conta
-    return 0;
+  return sum;
+}
+
+int sum_line(vector<int> vector){
+  int sum = 0;
+  for (int i=2;i<(int)vector.size();i++){
+    sum+=vector[i];
+  }
+  return sum;
+}
+
+void reserve_T() {
+  T.resize(H+1);
+  for (int i=0;i<H+1;i++) {
+    T[i].resize(n);
+    fill(T[i].begin(),T[i].end(),0);
   }
 
-  for (int k=1; k < h; k++) {
+  T[h][0] = 1;
 
-    if (direction) {
-      if (hi+k <=H){
-        //cout << "trying to add ascending " << hi+k << "\tH "<<H <<'\n';
-        DP[ni] += arc(ni+1, hi + k, true);
-        //cout << "var1: "<<var1 << '\n';
+  /*for (int i=3;i<n+1;i++) {
+    T[h][i] = 1;
+  }*/
+
+}
+
+vector<int> arc(){
+  int h_sub_min = 0;
+  vector <int> test;
+
+  for (int i=0;i<n-1;i++) {
+    for (int j=h;j<H+1;j++) {
+      if (T[j][i]!=0) {
+        h_sub_min = j+1;
+
+        for (int k=1; k < h && j+k<H+1; k++) {
+          // subida
+          if (j+k>=h_sub_min)                                    // HERE
+            T[j+k][i+1] += k;
+        }
       }
     }
-
-    if (hi-k >= h) {
-      //cout << "trying to add descending " << hi-k <<'\n';
-      DP[ni] += arc(ni+1, hi - k, false);
-    }
   }
-
-  return DP[n];
+  return T[h];
 }
 
 int main() {
@@ -91,7 +114,6 @@ int main() {
     // n - number of Lego blocks given
     // H - Height of ceiling
     int t;
-
     cin >> t;
 
     for (int i =0; i<t;i++){
@@ -101,12 +123,15 @@ int main() {
           cout << "0\n";
           continue;
         }
-        DP.clear();
-        DP.resize(n+1);
-        DP[0] = 0;
-        accepted = 0;
-        arc(1, h, true);
-        cout << mod_abs(sum_vector(DP), module) << '\n';
+        T.clear();
+        reserve_T();
+        //print_matrix(T);
+        //arc();
+
+        // sum_line(T,h,n)
+        cout <<mod_abs(sum_line(arc()), module) << '\n';
+        print_matrix(T);
+        //cout << "\n\n";
     }
 
     return 0;
