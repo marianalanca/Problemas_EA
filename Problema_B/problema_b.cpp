@@ -9,7 +9,6 @@ using namespace std;
 int module = 1000000007;
 int n, h, H;
 vector<vector<vector<int>>> T;
-//array<int, 2>
 
 // Statement formulas
 int mod_abs(int a, int mod) {
@@ -27,9 +26,9 @@ int mod_sub(int a, int b, int mod) {
 int sum_line(vector<vector<int>> vector){
   int sum = 0;
   for (int i=2;i<(int)vector.size();i++){
-    sum+= mod_abs(vector[i][1], module);
+    sum= mod_add(sum, vector[i][1], module);
   }
-  return mod_abs(sum, module);
+  return sum;
 }
 
 void reserve_T() {
@@ -49,11 +48,13 @@ vector<vector<int>> arc(){
       if (T[j][i][0]!=0 || T[j][i][1]!=0) {
         for (int k=1;k<h;k++) {
           if(j+k<=H-h && T[j][i][0]!=0) {
-            T[j+k][i+1][0]+= mod_abs(T[j][i][0], module);
+            T[j+k][i+1][0]= mod_add(T[j+k][i+1][0],T[j][i][0], module);
           }
           // descida
-          if(j-k>=0)
-            T[j-k][i+1][1] += mod_add(T[j][i][0], T[j][i][1], module);
+          if(j-k>=0){
+            T[j-k][i+1][1] = mod_add(T[j-k][i+1][1], T[j][i][0], module);
+            T[j-k][i+1][1] = mod_add(T[j-k][i+1][1], T[j][i][1], module);
+          }
         }
       }
     }
