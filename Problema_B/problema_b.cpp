@@ -8,7 +8,9 @@ using namespace std;
 
 int module = 1000000007;
 int n, h, H;
-vector<vector<vector<int>>> T;
+vector<vector<int>> previous, curr;
+int total;
+vector<int> aux(2,0);
 
 // Statement formulas
 int mod_abs(int a, int mod) {
@@ -18,6 +20,7 @@ int mod_abs(int a, int mod) {
 int mod_add(int a, int b, int mod) {
   return (mod_abs(a, mod) + mod_abs(b, mod)) % mod;
 }
+
 
 int mod_sub(int a, int b, int mod) {
   return mod_add(a, -b, mod);
@@ -32,34 +35,35 @@ int sum_line(vector<vector<int>> vector){
 }
 
 void reserve_T() {
-  vector<int> aux(2,0);
-  T.resize(H-h+1);
-  for (int i=0;i<H-h+1;i++) {
-    T[i].resize(n);
-    fill(T[i].begin(),T[i].end(),aux);
-  }
+  previous.resize(H-h+1, aux);
+  curr.resize(H-h+1, aux);
 
-  T[0][0][0] = 1;
+  previous[0][0] = 1;
 }
 
-vector<vector<int>> arc(){
+void arc(){
   for (int i=0;i<n-1;i++) {
     for (int j=0;j<=H-h;j++) {
-      if (T[j][i][0]!=0 || T[j][i][1]!=0) {
+      if (previous[j][0]!=0 || previous[j][1]!=0) {
         for (int k=1;k<h;k++) {
-          if(j+k<=H-h && T[j][i][0]!=0) {
-            T[j+k][i+1][0]= mod_add(T[j+k][i+1][0],T[j][i][0], module);
+          // subida
+          if(j+k<=H-h && previous[j][0]!=0) {
+            curr[j+k][0]= mod_add(curr[j+k][0], previous[j][0], module);
           }
+
           // descida
           if(j-k>=0){
-            T[j-k][i+1][1] = mod_add(T[j-k][i+1][1], T[j][i][0], module);
-            T[j-k][i+1][1] = mod_add(T[j-k][i+1][1], T[j][i][1], module);
+            curr[j-k][1] = mod_add(curr[j-k][1], previous[j][0], module);
+            curr[j-k][1] = mod_add(curr[j-k][1], previous[j][1], module);
           }
         }
+
       }
     }
+    total = mod_add(total, curr[0][1], module); // ignora logo a primeira linha e na segunda não pode ter
+    previous = curr;
+    fill(curr.begin(), curr.end(), aux); // ????????????????
   }
-  return T[0];
 }
 
 int main() {
@@ -77,10 +81,13 @@ int main() {
           cout << "0\n";
           continue;
         }
-        T.clear();
+        previous.clear();
+        curr.clear();
         reserve_T();
         // mudar modulo
-        cout << sum_line(arc()) << '\n';
+        arc();
+        cout << total << '\n';
+        total = 0;
     }
     return 0;
 }
