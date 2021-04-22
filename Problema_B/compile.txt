@@ -1,2 +1,5 @@
 g++ -std=c++17 -Wall -Wextra "problema_b.cpp" -lm
 a.exe < in
+
+g++ -std=c++17 -Wall -Wextra "test.cpp" -lm
+a.exe < in

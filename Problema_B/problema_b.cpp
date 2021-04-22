@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <array>
 #include <algorithm>
 using namespace std;
 
@@ -18,7 +19,8 @@ using namespace std;
 
 int module = 1000000007;
 int n, h, H;
-vector<vector<int>> T;
+vector<vector<vector<int>>> T;
+//array<int, 2>
 
 // Statement formulas
 int mod_abs(int a, int mod) {
@@ -33,21 +35,19 @@ int mod_sub(int a, int b, int mod) {
   return mod_add(a, -b, mod);
 }
 
-void print_matrix (vector<vector<int>> matrix) {
+void print_vector (vector<vector<int>> matrix) {
   for ( const auto &row : matrix )
   {
-    for ( const auto &s : row ) cout << s << ' ';
-    cout << endl;
-  }
-}
-
-void print_vector (vector<int> matrix) {
-  for ( const auto &row : matrix )
-  {
-    cout << row << ' ';
-    cout << '\n';
+    cout << "[" << row[0] <<","<<row[1] << "] ";
   }
   cout << endl;
+}
+
+void print_matrix (vector<vector<vector<int>>> matrix) {
+  for ( const auto &row : matrix)
+  {
+    print_vector(row);
+  }
 }
 
 int sum_vector(vector<int> vec) {
@@ -57,73 +57,73 @@ int sum_vector(vector<int> vec) {
   return total;
 }
 
-int sum_line(vector<vector<int>> matrix, int h, int size){
+int sum_line(vector<vector<vector<int>>> matrix, int h, int size){
   int sum = 0;
   for (int i=2;i<size;i++){
-    sum+=matrix[h][i];
+    sum+=matrix[h][i][1];
   }
   return sum;
 }
 
-int sum_line(vector<int> vector){
+int sum_line(vector<vector<int>> vector){
   int sum = 0;
   for (int i=2;i<(int)vector.size();i++){
-    sum+=vector[i];
+    sum+=vector[i][1];
   }
   return sum;
 }
 
 void reserve_T() {
+  vector<int> aux(2,0);
   T.resize(H+1);
   for (int i=0;i<H+1;i++) {
     T[i].resize(n);
-    fill(T[i].begin(),T[i].end(),0);
+    fill(T[i].begin(),T[i].end(),aux);
   }
 
-  T[h][0] = 1;
-
-  /*for (int i=3;i<n+1;i++) {
-    T[h][i] = 1;
-  }*/
-
+  T[h][0][0] = 1;
 }
 
-vector<int> arc(){
-  int h_sub_min = 0;
+vector<vector<int>> arc(){
 
   for (int i=0;i<n-1;i++) {
+    bool flag = true;
     for (int j=h;j<H+1;j++) {
-      if (T[j][i]!=0) {
-        h_sub_min = j+1;
-
+      if (T[j][i][0]!=0) {
         for (int k=1; k < h && j+k<H+1; k++) {
           // subida
-          if (j+k>=h_sub_min)                                // TODO
-            T[j+k][i+1] += k;
+          T[j+k][i+1][0] += k;
         }
       }
 
-      if (i>0) {
-        // fazer for do 0 & verificar se é maior!
-          if (j+h-1<H) {
-            int v = h;
-            int k=0;
-            while (j+v-1>j) {
-              if (T[j+v-1][i]>k)
-                k = T[j+v-1][i];
-              v--;
+        // descida
+        if (i>0 && flag){
+          // soma das subidas para erarem descida
+          // * BEM
+          if (j==H && T[j][i][0]!=0) { // chegou ao máximo e não é zero
+            for (int k=1; k<h && j-k>=h;k++) {
+              T[j-k][i+1][1]=T[j][i][0] - T[j-k][i][0];
             }
-            T[j][i+1] = k;
-            //cout << j << " " << i+1 << " "<< j+h-1<<" "<<T[j][i+1] << " " << T[j+h-1][i]<<"\n";
-          } else if (j < H){
-            //cout << j << " " << i+1 << " "<< H<<" "<<T[j][i+1] << " " << T[H][i]<<"\n";
-            T[j][i+1] += T[H][i];
+          } else if(T[j][i][0]==0 && j > h + i) { // j> h+i -> diagonal
+            // vai buscar o anterior e soma!
+            for (int k=2; k<h && j-k>=h;k++) {
+              T[j-k][i+1][1]=T[j-1][i][0] - T[j-k][i][0];
+            }
+            flag = false;
+          } else if (j-h+1>=h){
+            T[j-h+1][i+1][1]=T[j][i][0] - T[j-h+1][i][0];
           }
         }
-
+        // soma das descidas
+        // ! CORRIGIR!
+        if(j>0){
+          for (int k=1;k<h && j-k>=h;k++) {
+            T[j-k][i+1][1] += T[j][i][1];
+          }
+        }
     }
   }
-  return T[h];
+  return T[h-1];
 }
 
 int main() {
@@ -143,12 +143,10 @@ int main() {
         }
         T.clear();
         reserve_T();
-
-        // sum_line(T,h,n)
+        // mudar modulo
         cout <<mod_abs(sum_line(arc()), module) << '\n';
         print_matrix(T);
-        //cout << "\n\n";
+        cout << "\n\n";
     }
-
     return 0;
 }
