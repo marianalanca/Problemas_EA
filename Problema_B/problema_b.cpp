@@ -87,43 +87,21 @@ void reserve_T() {
 vector<vector<int>> arc(){
 
   for (int i=0;i<n-1;i++) {
-    bool flag = true;
-    for (int j=h;j<H+1;j++) {
-      if (T[j][i][0]!=0) {
-        for (int k=1; k < h && j+k<H+1; k++) {
-          // subida
-          T[j+k][i+1][0] += k;
+    for (int j=h;j<=H;j++) {
+      if (T[j][i][0]!=0 || T[j][i][1]!=0) {
+        for (int k=1;k<h;k++) {
+          if(j+k<=H && T[j][i][0]!=0) {
+            T[j+k][i+1][0]+= T[j][i][0];
+          }
+
+          // descida
+          if(j-k>=h)
+            T[j-k][i+1][1] += T[j][i][0] + T[j][i][1];
         }
       }
-
-        // descida
-        if (i>0 && flag){
-          // soma das subidas para erarem descida
-          // * BEM
-          if (j==H && T[j][i][0]!=0) { // chegou ao máximo e não é zero
-            for (int k=1; k<h && j-k>=h;k++) {
-              T[j-k][i+1][1]=T[j][i][0] - T[j-k][i][0];
-            }
-          } else if(T[j][i][0]==0 && j > h + i) { // j> h+i -> diagonal
-            // vai buscar o anterior e soma!
-            for (int k=2; k<h && j-k>=h;k++) {
-              T[j-k][i+1][1]=T[j-1][i][0] - T[j-k][i][0];
-            }
-            flag = false;
-          } else if (j-h+1>=h){
-            T[j-h+1][i+1][1]=T[j][i][0] - T[j-h+1][i][0];
-          }
-        }
-        // soma das descidas
-        // ! CORRIGIR!
-        if(j>0){
-          for (int k=1;k<h && j-k>=h;k++) {
-            T[j-k][i+1][1] += T[j][i][1];
-          }
-        }
     }
   }
-  return T[h-1];
+  return T[h];
 }
 
 int main() {
@@ -145,8 +123,6 @@ int main() {
         reserve_T();
         // mudar modulo
         cout <<mod_abs(sum_line(arc()), module) << '\n';
-        print_matrix(T);
-        cout << "\n\n";
     }
     return 0;
 }
