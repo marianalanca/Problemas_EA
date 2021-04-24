@@ -6,9 +6,8 @@ using namespace std;
 
 int module = 1000000007;
 int n, h, H;
-vector<vector<int>> previous, curr;
+vector<vector<int>> vec1, vec2;
 int total;
-int counter;
 
 int mod_abs(int a, int mod) {
   return ((a % mod) + mod) % mod;
@@ -29,38 +28,44 @@ void print_vector (vector<vector<int>> vector) {
   cout << "\n";
 }
 
-// ir buscar o de baixo, subtrair a descida do lado e, se existir, ir buscar o de cima cima
-void arc(){
-  for (int i=1;i<n;i++) {                                                             // * O (n-2)
-    for (int j=0;j<=H-h;j++) {                                                        // * O(H-h-1)
-      // subida
-      curr[j]= vector<int> (2,0);
-      if (j>=i  && (j-h<i || (j-h>=i && previous[j-h][0]!=0))) {
-        for (int k=1;k<h && j-k>=0;k++) {                                             // * O(h-2)
-          curr[j][0]= mod_add(curr[j][0], previous[j-k][0], module);
-        }
-      }
-
-      // descida
-      if (j==0){
-        // ? (previous[j+k][0]!=0 || previous[j+k][1]!=0)
-        for (int k=1;k<h && j+k<=H-h && (previous[j+k][0]!=0 || previous[j+k][1]!=0) ;k++) {   // * O(h-1)
-          curr[j][1] = mod_add(curr[j][1], previous[j+k][0], module);
-          curr[j][1] = mod_add(curr[j][1], previous[j+k][1], module);
-        }
-      } else if (j>0) {                                                              // * O(1)
-        curr[j][1] = curr[j-1][1];
-        curr[j][1] = mod_sub(curr[j][1], previous[j][1], module);
-        curr[j][1] = mod_sub(curr[j][1], previous[j][0], module);
-
-        if (j+h-1<=H-h){
-          curr[j][1] = mod_add(curr[j][1], previous[j+h-1][0], module);
-          curr[j][1] = mod_add(curr[j][1], previous[j+h-1][1], module);
-        }
+int calc(vector<vector<int>> &previous, vector<vector<int>> &curr, int i){
+  for (int j=0;j<=H-h && (j-h<i || (j-h>=i && previous[j-h][0]!=0));j++) {          // * O(H-h-1)
+    // subida
+    curr[j]= vector<int> (2,0); // esvaziar
+    if (j>=i) {
+      for (int k=1;k<h && j-k>=0;k++) {                                             // * O(h-2)
+        curr[j][0]= mod_add(curr[j][0], previous[j-k][0], module);
       }
     }
-    total = mod_add(total, curr[0][1], module);
-    previous = curr;
+
+    // descida
+    if (j==0){
+      for (int k=1;k<h && j+k<=H-h && (previous[j+k][0]!=0 || previous[j+k][1]!=0) ;k++) {   // * O(h-1)
+        curr[j][1] = mod_add(curr[j][1], previous[j+k][0], module);
+        curr[j][1] = mod_add(curr[j][1], previous[j+k][1], module);
+      }
+    } else if (j>0) {                                                                        // * O(1)
+      curr[j][1] = curr[j-1][1];
+      curr[j][1] = mod_sub(curr[j][1], previous[j][1], module);
+      curr[j][1] = mod_sub(curr[j][1], previous[j][0], module);
+
+      if (j+h-1<=H-h){
+        curr[j][1] = mod_add(curr[j][1], previous[j+h-1][0], module);
+        curr[j][1] = mod_add(curr[j][1], previous[j+h-1][1], module);
+      }
+    }
+  }
+  return curr[0][1];
+}
+
+void arc(){
+  total = 0;
+  for (int i=1;i<n;i++) {                                         // * O (n-2)
+    if (i%2!=0) {
+      total = mod_add(total, calc(vec1, vec2,i), module);
+    } else {
+      total = mod_add(total, calc(vec2, vec1,i), module);
+    }
   }
 }
 
@@ -89,16 +94,15 @@ int main() {
         if ( n<3 || h >= H) {
           cout << "0\n";
         } else {
-          previous.clear();
-          curr.clear();
+          vec1.clear();
+          vec2.clear();
 
-          previous.resize(H-h+1, vector<int> (2,0));
-          curr.resize(H-h+1, vector<int> (2,0));
+          vec1.resize(H-h+1, vector<int> (2,0));
+          vec2.resize(H-h+1, vector<int> (2,0));
 
-          previous[0][0] = 1;
+          vec1[0][0] = 1;
           arc();
           cout << total << '\n';
-          total = 0;
         }
     }
     return 0;
