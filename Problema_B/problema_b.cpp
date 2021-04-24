@@ -29,14 +29,10 @@ void print_vector (vector<vector<int>> vector) {
 }
 
 int calc(vector<vector<int>> &previous, vector<vector<int>> &curr, int i){
-  for (int j=0;j<=H-h && (j-h<i || (j-h>=i && previous[j-h][0]!=0));j++) {          // * O(H-h-1)
+  // (j-h<i && previous[i-1][0]!=0) 
+  for (int j=0;j<=H-h && ((j-h<i) || (j-h>=i && previous[j-h][0]!=0));j++) {          // * O(H-h-1)
     // subida
-    curr[j]= vector<int> (2,0); // esvaziar
-    if (j>=i) {
-      for (int k=1;k<h && j-k>=0;k++) {                                             // * O(h-2)
-        curr[j][0]= mod_add(curr[j][0], previous[j-k][0], module);
-      }
-    }
+    curr[j]= vector<int> (2,0); // esvaziar/
 
     // descida
     if (j==0){
@@ -44,7 +40,8 @@ int calc(vector<vector<int>> &previous, vector<vector<int>> &curr, int i){
         curr[j][1] = mod_add(curr[j][1], previous[j+k][0], module);
         curr[j][1] = mod_add(curr[j][1], previous[j+k][1], module);
       }
-    } else if (j>0) {                                                                        // * O(1)
+    } else if (j>0) {
+      // descida                                                                       // * O(1)
       curr[j][1] = curr[j-1][1];
       curr[j][1] = mod_sub(curr[j][1], previous[j][1], module);
       curr[j][1] = mod_sub(curr[j][1], previous[j][0], module);
@@ -53,6 +50,22 @@ int calc(vector<vector<int>> &previous, vector<vector<int>> &curr, int i){
         curr[j][1] = mod_add(curr[j][1], previous[j+h-1][0], module);
         curr[j][1] = mod_add(curr[j][1], previous[j+h-1][1], module);
       }
+
+      if (j>=i) {
+        if (curr[j-1][0]==0) {  // o de baixo ainda não foi calculado
+          for (int k=1;k<h && j-k>=0;k++) {                                             // * O(h-2)
+            curr[j][0]= mod_add(curr[j][0], previous[j-k][0], module);
+          }
+        } else {
+          curr[j][0] = mod_abs(curr[j-1][0], module);
+          curr[j][0]= mod_add(curr[j][0], previous[j-1][0], module);
+
+          if (j-h>=0) {
+            curr[j][0]= mod_sub(curr[j][0], previous[j-h][0], module);
+          }
+        }
+      }
+
     }
   }
   return curr[0][1];
