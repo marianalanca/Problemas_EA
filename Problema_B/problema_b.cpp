@@ -24,7 +24,6 @@ int mod_sub(int a, int b, int mod) {
 int calc(vector<vector<int>> &previous, vector<vector<int>> &curr, int i){
   // (j-h<i && previous[i-1][0]!=0)
   for (int j=0;j<=H-h && ((j-h<i) || (j-h>=i && previous[j-h][0]!=0));j++) {          // * O(H-h-1)
-    // subida
     curr[j]= vector<int> (2,0); // esvaziar/
 
     // descida
