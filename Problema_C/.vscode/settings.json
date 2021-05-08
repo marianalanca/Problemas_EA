@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "iostream": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "vector": "cpp",
+        "queue": "cpp",
+        "deque": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp"
     }
 }
