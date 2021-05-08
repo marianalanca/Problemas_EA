@@ -3,7 +3,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
-#include <deque>
+#include <stack>
 using namespace std;
 
 /*
@@ -33,10 +33,11 @@ Function FF(GR)
 int n;
 vector<vector<int>> adj; // -> fazer vec com matriz para guardar os dados
 vector<int> low, dfs;
-vector<deque<int>> Scc;
+vector<vector<int>> Scc;
 int t;
-deque<int> C;
-deque<int> S;
+stack<int> C;
+stack<int> S;
+vector<bool> onStack;
 
 void print(vector<vector<int>> grid) {
   for ( const std::vector<int> &v : grid )
@@ -44,6 +45,7 @@ void print(vector<vector<int>> grid) {
     for ( int x : v ) std::cout << x << ' ';
     std::cout << std::endl;
   }
+  cout << '\n';
 }
 
 void print(vector<int> vec) {
@@ -70,29 +72,32 @@ void print_deque(deque<int> deque) {
     cout << '\n';
 }
 
-void Tarjan(int v) {
-  low[v] = dfs[v] = t;
-  t++;
-  S.push_front(v);
-  for (int w=0; w<n;w++){                       // ?
-    if (dfs[w] == -1) { // inicializar dfs a -1
-      Tarjan(w);
-      low[v] = min(low[v], low[w]);
-    } else if (find(S.begin(), S.end(), w) == S.end()) {
-      low[v] =  min(low[v], low[w]);
+void Tarjan(int v){
+    static stack<int> st;
+
+    dfs[v]=low[v]=t++;
+    st.push(v);
+    onStack[v]=true;
+    for(auto w:adj[v]){
+        if(dfs[w]==-1){
+            Tarjan(w);
+            low[v]=min(low[v],low[w]);
+        }
+        else if(onStack[w])
+            low[v]=min(low[v],dfs[w]);
     }
-  }
-  // !DEBUG
-  // cout << "v: " << v << " low[v] " << low[v] << " dfs[v] " << dfs[v] << '\n';
-  if (low[v] == dfs[v]) {
-    int w;
-    do {
-      w = S.front();
-      S.pop_front();
-      C.push_front(w);
-    } while(w!=v);
-    Scc.push_back(C);
-  }
+    if(dfs[v]==low[v]){
+        vector<int> C;
+        while(1){
+            int w=st.top();
+            st.pop();
+            onStack[v]=false;
+            C.push_back(v);
+            if(v==w)
+                break;
+        }
+        Scc.push_back(C);
+    }
 }
 
 int main() {
@@ -104,37 +109,45 @@ int main() {
 
     for (int i =0; i<z;i++){
         cin >> n >> m >> q;
-        adj.clear();
+
         t = 1;
 
+        adj.clear();
+        adj.resize(n);
+
         low.clear();
-        low.resize(n , 1000);
+        low.resize(n);
 
         dfs.clear();
-        dfs.resize(n ,0);
+        dfs.resize(n ,-1);
+
         Scc.clear();
 
+        onStack.clear();
+        onStack.resize(n);
+
         // MELHORAR
-        vector<int> temp (n , -1);
-        adj.resize(n);
+        vector<int> temp (n);
         fill (adj.begin(), adj.end(), temp);
+
+        C = stack<int>();
+        S = stack<int>();
 
         // MAL
 
         for (int j =0; j< m; j++) {
-          C.clear();
-          cin >> x;
-          cin >> y;
-          cin >> v;
+          cin >> x >> y >> v;
           adj[x-1][y-1] = v;
-          low[y-1] = dfs[y-1] = -1; // ?
-          //print(dfs);
-          S.clear();
-          Tarjan(x-1);
         }
 
-        //print(adj);
-        print_deque(Scc);
+        for (int k = 0;k < n; k++) {
+          if (dfs[x-1] == -1)
+            Tarjan(x-1);
+        }
+
+        print(Scc);
+        //print_deque(Scc);
     }
+    cout << "final\n";
     return 0;
 }

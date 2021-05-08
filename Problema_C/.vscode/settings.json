@@ -6,6 +6,7 @@
         "queue": "cpp",
         "deque": "cpp",
         "xstring": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "stack": "cpp"
     }
 }
