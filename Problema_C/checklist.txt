@@ -2,6 +2,7 @@ CHECKLIST EA_C
 
 	[DONE]		Leitura do input
 	[TO DO]		Tarjan
+	[TO DO]		Spanning tree
 	[TO DO]		Função de bike lane
 	
 
