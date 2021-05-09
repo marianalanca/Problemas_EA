@@ -7,6 +7,7 @@
         "deque": "cpp",
         "xstring": "cpp",
         "xutility": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "algorithm": "cpp"
     }
 }

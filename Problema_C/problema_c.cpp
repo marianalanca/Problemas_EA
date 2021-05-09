@@ -7,27 +7,7 @@
 using namespace std;
 
 /*
-Tarjan, FF(GR)
-
-Function FF(GR)
-  mflow = 0
-  while there is a s-t path P in GR do
-  fp
-  = minfc(u; v) j (u; v) 2 Pg
-  for each arc (u; v) in P do
-  c(u; v) = c(u; v) − fp
-  c(v; u) = c(v; u) + fp
-  mflow = mflow + fp
-  return mflow
-
-
-  For each arc (u; v) in G, GR contains an arc (u; v) with
-  capacity c(u; v) and an arc (v; u) with capacity 0.
-
-
-  But if the s-t path with the least number of arcs is chosen (with
-  BFS), the time complexity reduces to O(jV j · jEj2) for any network
-  (Edmond-Karp Algorithm).
+https://gist.github.com/APwhitehat/e2ae94b811defc7407bc320f98fd268b#file-tarjan-cpp-L51
 */
 
 int n, t;
@@ -40,8 +20,7 @@ stack<int> C;
 stack<int> S;
 vector<bool> onStack;
 
-bool sortcol( const vector<int>& v1,
-              const vector<int>& v2 ) {
+bool sortcol( const vector<int>& v1, const vector<int>& v2 ) {
     return v1[0] < v2[0];
 }
 
@@ -76,12 +55,11 @@ void unionLink(int a, int b){
     link(find_set(a), find_set(b));
 }
 
-
 vector<vector<int>> Kruskal(){
 
     vector<vector<int>> T;
     int u, v;
-    
+
     set.resize(n);
     ranks.resize(n, 0);
 
@@ -99,11 +77,11 @@ vector<vector<int>> Kruskal(){
             else{
                 for(int i = 0; i < T.size(); i ++){
 
-                    if(T[i][0]>arc[0] or i == T.size() - 1){
+                    if(T[i][0]>arc[0] || i == T.size() - 1){
                         T.push_back(arc);
                         break;
                     }
-                    if(T[i][0]==arc[0] and T[i][1]==arc[1] and T[i][1]==arc[1]){
+                    if(T[i][0]==arc[0] && T[i][1]==arc[1] && T[i][1]==arc[1]){
                         break;
                     }
 
@@ -120,11 +98,10 @@ vector<vector<int>> Kruskal(){
     return T;
 }
 
-
 void print(vector<vector<int>> grid) {
   for ( const std::vector<int> &v : grid )
   {
-    for ( int x : v ) std::cout << x << ' ';
+    for ( int x : v ) std::cout << x+1 << ' ';
     std::cout << std::endl;
   }
   cout << '\n';
@@ -137,49 +114,58 @@ void print(vector<int> vec) {
   cout << "\n";
 }
 
-void print_deque(vector<deque<int>> deque) {
-  for(auto iter = deque.begin(); iter != deque.end(); ++iter) {
-      for(auto iter_row = (*iter).rbegin(); iter_row != (*iter).rend(); ++iter_row) {
-          cout << *iter_row << ' ';
-      }
-      cout << '\n';
-  }
-  cout << "\n\n";
-}
-
-void print_deque(deque<int> deque) {
-    for(auto iter_row = deque.rbegin(); iter_row != deque.rend(); ++iter_row) {
-        cout << *iter_row << ' ';
-    }
-    cout << '\n';
-}
-
 void Tarjan(int v){
-    static stack<int> st;
+    static stack<int> S;
 
     dfs[v]=low[v]=t++;
-    st.push(v);
+
+    S.push(v);
     onStack[v]=true;
-    for(auto w:adj[v]){
-        if(dfs[w]==-1){
-            Tarjan(w);
-            low[v]=min(low[v],low[w]);
+    for(auto i:adj[v]){
+        //int w = i[1];
+        if(adj[v][i]!=-1 && dfs[i]==-1){
+            Tarjan(i);
+            low[v]=min(low[v],low[i]);
         }
-        else if(onStack[w])
-            low[v]=min(low[v],dfs[w]);
+        else if(onStack[i])
+            low[v]=min(low[v],dfs[i]);
     }
     if(dfs[v]==low[v]){
         vector<int> C;
-        while(1){
-            int w=st.top();
-            st.pop();
-            onStack[v]=false;
-            C.push_back(v);
-            if(v==w)
-                break;
+        int w;
+        do{
+            w=S.top();
+            S.pop();
+            onStack[w]=false;
+            C.push_back(w);
+        } while(w!=v);
+        if (C.size()>1) {
+          /*if (C.size() > maxSize ){
+            maxSize= C.size();
+          } */// maxSize
+           Scc.push_back(C);
         }
-        Scc.push_back(C);
     }
+}
+
+void callTarjan() {
+  t = 1;
+
+  dfs.clear();
+  dfs.resize(n , -1);
+
+  low.clear();
+  low.resize(n);
+
+  Scc.clear();
+
+  onStack.clear();
+  onStack.resize(n, 0);
+
+  for (int k = 0;k < n; k++) {
+    if (dfs[k] == -1)
+      Tarjan(k);
+  }
 }
 
 int main() {
@@ -196,37 +182,19 @@ int main() {
         cin >> n >> m >> q;
 
         t = 1;
-
         adj.clear();
         adj.resize(n);
 
-        arcs.clear();
-
-        low.clear();
-        low.resize(n);
-
-        dfs.clear();
-        dfs.resize(n ,-1);
-
-        Scc.clear();
-
-        onStack.clear();
-        onStack.resize(n);
-
-        // MELHORAR
         vector<int> temp (n);
         fill (adj.begin(), adj.end(), temp);
 
-        C = stack<int>();
-        S = stack<int>();
-
-        // MAL
+        arcs.clear();
 
         for (int j =0; j< m; j++) {
             aux.resize(3);
 
             cin >> x >> y >> v;
-            adj[x-1][y-1] = v;
+            adj[x-1][y-1] = y-1;
 
             aux[0]=v;
             aux[1]=x-1;
@@ -236,26 +204,21 @@ int main() {
             aux.clear();
         }
 
+        callTarjan();
+
         sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
 
-        for (int k = 0;k < n; k++) {
-          if (dfs[x-1] == -1)
-            Tarjan(x-1);
-        }
+        cout << "\n-----------------TARJAN--------------------\n";
 
-        //print(Scc);
-        //print_deque(Scc);
+        print(Scc);
 
-        //print(adj);
-
-        cout << "\n-----------------ARCS--------------------\n";
+        /*cout << "\n-----------------ARCS--------------------\n";
 
         print(arcs);
 
         cout << "\n-----------------KRUSKAL--------------------\n";
 
-        print(Kruskal());
+        print(Kruskal());*/
     }
-    cout << "final\n";
     return 0;
 }
