@@ -4,7 +4,6 @@ CHECKLIST EA_C
 	[TO DO]		Tarjan
 	[TO DO]		Spanning tree
 	[TO DO]		Função de bike lane
-	
 
 ---------------------------------------------------------------------------------------------------
 TESTAR:

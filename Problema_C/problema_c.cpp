@@ -15,7 +15,7 @@ vector<vector<int>> adj; // -> fazer vec com matriz para guardar os dados
 vector<vector<int>>arcs;
 vector<int> set, ranks;
 vector<int> low, dfs;
-vector<vector<int>> Scc;
+vector<vector<vector<int>>> Scc;
 stack<int> C;
 stack<int> S;
 vector<bool> onStack;
@@ -107,6 +107,21 @@ void print(vector<vector<int>> grid) {
   cout << '\n';
 }
 
+void print(vector<vector<vector<int>>> grid) {
+  for ( const std::vector<vector<int>> &v : grid )
+  {
+    for ( vector<int> x : v ) {
+        for ( int y : x ) {
+            std::cout << y+1 << ' ';
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+
 void print(vector<int> vec) {
   for(auto iter = vec.begin(); iter != vec.end(); ++iter) {
         cout << *iter << ' ';
@@ -115,34 +130,33 @@ void print(vector<int> vec) {
 }
 
 void Tarjan(int v){
-    static stack<int> S;
+    static stack<int> S;    // guardar a informação toda
 
     dfs[v]=low[v]=t++;
 
     S.push(v);
     onStack[v]=true;
-    for(auto i:adj[v]){
-        //int w = i[1];
-        if(adj[v][i]!=-1 && dfs[i]==-1){
-            Tarjan(i);
-            low[v]=min(low[v],low[i]);
+    //for(auto i:adj[v]){
+    for (int i=0;i<n;i++) {
+        if (adj[v][i]!=-1){
+            if(adj[v][i]!=-1 && dfs[i]==-1){
+                Tarjan(i);
+                low[v]=min(low[v],low[i]);
+            }
+            else if(onStack[i])
+                low[v]=min(low[v],dfs[i]);
         }
-        else if(onStack[i])
-            low[v]=min(low[v],dfs[i]);
     }
     if(dfs[v]==low[v]){
-        vector<int> C;
+        vector<vector<int>> C;
         int w;
         do{
-            w=S.top();
+            w = S.top();
             S.pop();
             onStack[w]=false;
-            C.push_back(w);
+            C.push_back(vector<int> {adj[v][w], v, w}); // ! MAL
         } while(w!=v);
         if (C.size()>1) {
-          /*if (C.size() > maxSize ){
-            maxSize= C.size();
-          } */// maxSize
            Scc.push_back(C);
         }
     }
@@ -168,6 +182,16 @@ void callTarjan() {
   }
 }
 
+int findBiggestPath() {
+    int best = 0;
+    for (auto circuit: Scc) {
+        if ((int) circuit.size() > best) {
+            best = circuit.size();
+        }
+    }
+    return best;
+}
+
 int main() {
 
     int m, q;
@@ -181,38 +205,55 @@ int main() {
     for (int i =0; i<z;i++){
         cin >> n >> m >> q;
 
-        t = 1;
-        adj.clear();
-        adj.resize(n);
+        if (q>=1) {
 
-        vector<int> temp (n);
-        fill (adj.begin(), adj.end(), temp);
+            t = 1;
+            adj.clear();
+            adj.resize(n);
 
-        arcs.clear();
+            vector<int> temp (n, -1);
+            fill (adj.begin(), adj.end(), temp);
 
-        for (int j =0; j< m; j++) {
-            aux.resize(3);
+            arcs.clear();
 
-            cin >> x >> y >> v;
-            adj[x-1][y-1] = y-1;
+            for (int j =0; j< m; j++) {
+                aux.resize(3);
 
-            aux[0]=v;
-            aux[1]=x-1;
-            aux[2]=y-1;
-            arcs.push_back(aux);
+                cin >> x >> y >> v;
+                adj[x-1][y-1] = v;
 
-            aux.clear();
+                aux[0]=v;
+                aux[1]=x-1;
+                aux[2]=y-1;
+                arcs.push_back(aux);
+
+                aux.clear();
+            }
+
+            callTarjan();
+            print(Scc);
+            //cout << Scc.size() << ' ';
+
+            if (q>=2) {
+                //cout << findBiggestPath() << ' ';
+
+                if (q>=3){
+                    sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
+                    Kruskal();
+                    // calc Krustal
+                    if (q==4) {
+
+                    }
+                }
+            }
+            cout << '\n';
         }
 
-        callTarjan();
-
-        sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
-
-        cout << "\n-----------------TARJAN--------------------\n";
+        /*cout << "\n-----------------TARJAN--------------------\n";
 
         print(Scc);
 
-        /*cout << "\n-----------------ARCS--------------------\n";
+        cout << "\n-----------------ARCS--------------------\n";
 
         print(arcs);
 
