@@ -30,14 +30,96 @@ Function FF(GR)
   (Edmond-Karp Algorithm).
 */
 
-int n;
+int n, t;
 vector<vector<int>> adj; // -> fazer vec com matriz para guardar os dados
+vector<vector<int>>arcs;
+vector<int> set, ranks;
 vector<int> low, dfs;
 vector<vector<int>> Scc;
-int t;
 stack<int> C;
 stack<int> S;
 vector<bool> onStack;
+
+bool sortcol( const vector<int>& v1,
+              const vector<int>& v2 ) {
+    return v1[0] < v2[0];
+}
+
+void make_set(){
+    for(int i=0; i < n;i++){
+        set[i]=i;
+    }
+}
+
+int find_set(int a){
+
+    if (set[a] != a){
+        set[a] = find_set(set[a]);
+    }
+
+    return set[a];
+}
+
+void link(int a, int b){
+    if(ranks[a] > ranks[b]){
+        set[b] = a;
+    }
+    else{
+        set[a] = b;
+    }
+    if(ranks[a] == ranks[b]){
+        ranks[b]++;
+    }
+}
+
+void unionLink(int a, int b){
+    link(find_set(a), find_set(b));
+}
+
+
+vector<vector<int>> Kruskal(){
+
+    vector<vector<int>> T;
+    int u, v;
+    
+    set.resize(n);
+    ranks.resize(n, 0);
+
+    make_set();
+
+    for(auto & arc : arcs){
+        u = arc[1];
+        v = arc[2];
+
+        if(find_set(u) != find_set(v)){
+
+            if(T.empty()){
+                T.push_back(arc);
+            }
+            else{
+                for(int i = 0; i < T.size(); i ++){
+
+                    if(T[i][0]>arc[0] or i == T.size() - 1){
+                        T.push_back(arc);
+                        break;
+                    }
+                    if(T[i][0]==arc[0] and T[i][1]==arc[1] and T[i][1]==arc[1]){
+                        break;
+                    }
+
+                }
+            }
+
+            unionLink(u, v);
+        }
+    }
+    
+    set.clear();
+    ranks.clear();
+
+    return T;
+}
+
 
 void print(vector<vector<int>> grid) {
   for ( const std::vector<int> &v : grid )
@@ -101,9 +183,12 @@ void Tarjan(int v){
 }
 
 int main() {
+
     int m, q;
     int z;
     int x, y, v;
+
+    vector<int> aux;
 
     cin >> z;
 
@@ -114,6 +199,8 @@ int main() {
 
         adj.clear();
         adj.resize(n);
+
+        arcs.clear();
 
         low.clear();
         low.resize(n);
@@ -136,17 +223,38 @@ int main() {
         // MAL
 
         for (int j =0; j< m; j++) {
-          cin >> x >> y >> v;
-          adj[x-1][y-1] = v;
+            aux.resize(3);
+
+            cin >> x >> y >> v;
+            adj[x-1][y-1] = v;
+
+            aux[0]=v;
+            aux[1]=x-1;
+            aux[2]=y-1;
+            arcs.push_back(aux);
+
+            aux.clear();
         }
+
+        sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
 
         for (int k = 0;k < n; k++) {
           if (dfs[x-1] == -1)
             Tarjan(x-1);
         }
 
-        print(Scc);
+        //print(Scc);
         //print_deque(Scc);
+
+        //print(adj);
+
+        cout << "\n-----------------ARCS--------------------\n";
+
+        print(arcs);
+
+        cout << "\n-----------------KRUSKAL--------------------\n";
+
+        print(Kruskal());
     }
     cout << "final\n";
     return 0;
