@@ -75,9 +75,9 @@ vector<vector<int>> Kruskal(){
                 T.push_back(arc);
             }
             else{
-                for(int i = 0; i < T.size(); i ++){
+                for(int i = 0; i < (int) T.size(); i ++){
 
-                    if(T[i][0]>arc[0] || i == T.size() - 1){
+                    if(T[i][0]>arc[0] || i == (int) T.size() - 1){
                         T.push_back(arc);
                         break;
                     }
@@ -130,7 +130,7 @@ void print(vector<int> vec) {
 }
 
 void Tarjan(int v){
-    static stack<int> S;    // guardar a informação toda
+    static stack<int> S;
 
     dfs[v]=low[v]=t++;
 
@@ -149,12 +149,21 @@ void Tarjan(int v){
     }
     if(dfs[v]==low[v]){
         vector<vector<int>> C;
+        vector<int> C_aux;
         int w;
         do{
             w = S.top();
             S.pop();
-            onStack[w]=false;
-            C.push_back(vector<int> {adj[v][w], v, w}); // ! MAL
+            onStack[w] = false;
+            for (int el: C_aux) {
+                if (adj[w][el]>0) {
+                    C.push_back(vector<int> {adj[w][el], w, el});
+                }
+                if (adj[el][w]>0) {
+                    C.push_back(vector<int> {adj[el][w], el, w});
+                }
+            }
+            C_aux.push_back(w);
         } while(w!=v);
         if (C.size()>1) {
            Scc.push_back(C);
@@ -232,6 +241,7 @@ int main() {
 
             callTarjan();
             print(Scc);
+            //print(adj);
             //cout << Scc.size() << ' ';
 
             if (q>=2) {
