@@ -6,19 +6,14 @@
 #include <stack>
 using namespace std;
 
-/*
-https://gist.github.com/APwhitehat/e2ae94b811defc7407bc320f98fd268b#file-tarjan-cpp-L51
-*/
-
 int n, t;
-vector<vector<int>> adj; // -> fazer vec com matriz para guardar os dados
-vector<vector<int>>arcs;
+int sum_total, sum_parcial;
+vector<vector<int>> adj;
+vector<vector<vector<int>>> Scc;
 vector<int> set, ranks;
 vector<int> low, dfs;
-vector<vector<vector<int>>> Scc;
-stack<int> C;
-stack<int> S;
 vector<bool> onStack;
+int POIs;
 
 bool sortcol( const vector<int>& v1, const vector<int>& v2 ) {
     return v1[0] < v2[0];
@@ -55,10 +50,11 @@ void unionLink(int a, int b){
     link(find_set(a), find_set(b));
 }
 
-vector<vector<int>> Kruskal(){
+vector<vector<int>> Kruskal(vector<vector<int>> &arcs){
 
     vector<vector<int>> T;
     int u, v;
+    int sum_aux = 0;
 
     set.resize(n);
     ranks.resize(n, 0);
@@ -73,27 +69,34 @@ vector<vector<int>> Kruskal(){
 
             if(T.empty()){
                 T.push_back(arc);
+                sum_total += arc[0];
+                sum_aux += arc[0];
             }
             else{
                 for(int i = 0; i < (int) T.size(); i ++){
 
                     if(T[i][0]>arc[0] || i == (int) T.size() - 1){
+                        sum_total += arc[0];
+                        sum_aux += arc[0];
                         T.push_back(arc);
                         break;
                     }
                     if(T[i][0]==arc[0] && T[i][1]==arc[1] && T[i][1]==arc[1]){
                         break;
                     }
-
                 }
             }
 
             unionLink(u, v);
         }
     }
-    
+
     set.clear();
     ranks.clear();
+
+    if(sum_parcial < sum_aux){
+        sum_parcial = sum_aux;
+    }
 
     return T;
 }
@@ -120,7 +123,6 @@ void print(vector<vector<vector<int>>> grid) {
   }
   std::cout << std::endl;
 }
-
 
 void print(vector<int> vec) {
   for(auto iter = vec.begin(); iter != vec.end(); ++iter) {
@@ -166,6 +168,9 @@ void Tarjan(int v){
             C_aux.push_back(w);
         } while(w!=v);
         if (C.size()>1) {
+            if ((int) C_aux.size() > POIs) {
+                POIs = C_aux.size();
+            }
            Scc.push_back(C);
         }
     }
@@ -191,23 +196,11 @@ void callTarjan() {
   }
 }
 
-int findBiggestPath() {
-    int best = 0;
-    for (auto circuit: Scc) {
-        if ((int) circuit.size() > best) {
-            best = circuit.size();
-        }
-    }
-    return best;
-}
-
 int main() {
 
     int m, q;
     int z;
     int x, y, v;
-
-    vector<int> aux;
 
     cin >> z;
 
@@ -223,36 +216,35 @@ int main() {
             vector<int> temp (n, -1);
             fill (adj.begin(), adj.end(), temp);
 
-            arcs.clear();
-
             for (int j =0; j< m; j++) {
-                aux.resize(3);
 
                 cin >> x >> y >> v;
                 adj[x-1][y-1] = v;
-
-                aux[0]=v;
-                aux[1]=x-1;
-                aux[2]=y-1;
-                arcs.push_back(aux);
-
-                aux.clear();
             }
 
+            POIs = 0;
+
             callTarjan();
-            print(Scc);
             //print(adj);
-            //cout << Scc.size() << ' ';
+            cout << Scc.size();
 
             if (q>=2) {
-                //cout << findBiggestPath() << ' ';
+
+                cout << ' ' << POIs;
 
                 if (q>=3){
-                    sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
-                    Kruskal();
+                    sum_total = 0;
+                    sum_parcial=0;
+                    for (auto arcs: Scc) {
+                        sort(arcs.begin(), arcs.end(), sortcol); //ordenar por ordem crescente edges pelo custo
+                        Kruskal(arcs);
+                    }
+
+                    cout << ' ' << sum_parcial;
+
                     // calc Krustal
                     if (q==4) {
-
+                        cout << ' ' << sum_total;
                     }
                 }
             }
