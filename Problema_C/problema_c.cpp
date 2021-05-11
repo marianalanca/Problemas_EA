@@ -6,14 +6,16 @@
 #include <stack>
 using namespace std;
 
-int n, t;
+int n, t, POIs;
 int sum_total, sum_parcial;
 vector<vector<int>> adj;
 vector<vector<vector<int>>> Scc;
 vector<int> set, ranks;
 vector<int> low, dfs;
 vector<bool> onStack;
-int POIs;
+
+// Quando fazes o teu circuito ou seja a componente fortemente conexa ve se quando estas a fazer a MST estas a usar aa edges que vão para fora do circuito
+// Se dois circuitos tiverem a mesma lane length ganha o que tiver mais POIs
 
 bool sortcol( const vector<int>& v1, const vector<int>& v2 ) {
     return v1[0] < v2[0];
@@ -242,7 +244,6 @@ int main() {
 
                     cout << ' ' << sum_parcial;
 
-                    // calc Krustal
                     if (q==4) {
                         cout << ' ' << sum_total;
                     }
