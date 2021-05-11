@@ -58,6 +58,7 @@ vector<vector<int>> Kruskal(vector<vector<int>> &arcs){
     int u, v;
     int sum_aux = 0;
 
+    T.clear();
     set.resize(n);
     ranks.resize(n, 0);
 
@@ -84,6 +85,8 @@ vector<vector<int>> Kruskal(vector<vector<int>> &arcs){
                         break;
                     }
                     if(T[i][0]==arc[0] && T[i][1]==arc[1] && T[i][1]==arc[1]){
+                        sum_total += arc[0];
+                        sum_aux += arc[0];
                         break;
                     }
                 }
@@ -101,36 +104,6 @@ vector<vector<int>> Kruskal(vector<vector<int>> &arcs){
     }
 
     return T;
-}
-
-void print(vector<vector<int>> grid) {
-  for ( const std::vector<int> &v : grid )
-  {
-    for ( int x : v ) std::cout << x+1 << ' ';
-    std::cout << std::endl;
-  }
-  cout << '\n';
-}
-
-void print(vector<vector<vector<int>>> grid) {
-  for ( const std::vector<vector<int>> &v : grid )
-  {
-    for ( vector<int> x : v ) {
-        for ( int y : x ) {
-            std::cout << y+1 << ' ';
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-  }
-  std::cout << std::endl;
-}
-
-void print(vector<int> vec) {
-  for(auto iter = vec.begin(); iter != vec.end(); ++iter) {
-        cout << *iter << ' ';
-  }
-  cout << "\n";
 }
 
 void Tarjan(int v){
@@ -154,6 +127,8 @@ void Tarjan(int v){
     if(dfs[v]==low[v]){
         vector<vector<int>> C;
         vector<int> C_aux;
+        C.clear();
+        C_aux.clear();
         int w;
         do{
             w = S.top();
@@ -227,7 +202,6 @@ int main() {
             POIs = 0;
 
             callTarjan();
-            //print(adj);
             cout << Scc.size();
 
             if (q>=2) {
@@ -251,18 +225,6 @@ int main() {
             }
             cout << '\n';
         }
-
-        /*cout << "\n-----------------TARJAN--------------------\n";
-
-        print(Scc);
-
-        cout << "\n-----------------ARCS--------------------\n";
-
-        print(arcs);
-
-        cout << "\n-----------------KRUSKAL--------------------\n";
-
-        print(Kruskal());*/
     }
     return 0;
 }
